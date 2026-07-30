@@ -4,10 +4,10 @@
 
 | 脚本 | 用途 |
 |------|------|
-| `deploy_kafka.sh` | **单机版**部署(单节点 broker+controller)。可选 SASL/PLAIN 认证 + ACL 授权。 |
+| `deploy_kafka_single.sh` | **单机版**部署(单节点 broker+controller)。可选 SASL/PLAIN 认证 + ACL 授权。 |
 | `deploy_kafka_cluster.sh` | **多节点集群**部署(每节点 broker+controller,组成 KRaft 仲裁)。默认开启 SASL/PLAIN 认证 + ACL 授权,支持自定义账号与授权。 |
 
-`deploy_kafka.sh` —— 一键部署 **Kafka 3.9.0(kafka_2.13-3.9.0,KRaft 模式)** 单机环境。
+`deploy_kafka_single.sh` —— 一键部署 **Kafka 3.9.0(kafka_2.13-3.9.0,KRaft 模式)** 单机环境。
 基于 KRaft(无需 ZooKeeper),单节点同时承担 broker + controller 角色,自动完成下载/解压、配置渲染、存储格式化与 systemd 服务注册。
 
 ## 特性
@@ -33,20 +33,20 @@
 ## 快速开始
 
 ```bash
-chmod +x deploy_kafka.sh
+chmod +x deploy_kafka_single.sh
 ```
 
 ### 在线部署(自动从官方/镜像下载)
 
 ```bash
 # 使用默认目录(/opt/kafka 与 /var/lib/kafka/data)
-sudo ./deploy_kafka.sh
+sudo ./deploy_kafka_single.sh
 
 # 自定义安装目录与数据目录
-sudo ./deploy_kafka.sh -i /usr/local/kafka -d /data/kafka
+sudo ./deploy_kafka_single.sh -i /usr/local/kafka -d /data/kafka
 
 # 国内服务器走阿里云镜像加速
-sudo ./deploy_kafka.sh -m https://mirrors.aliyun.com/apache/kafka/3.9.0
+sudo ./deploy_kafka_single.sh -m https://mirrors.aliyun.com/apache/kafka/3.9.0
 ```
 
 ### 离线部署(使用本地安装包)
@@ -54,7 +54,7 @@ sudo ./deploy_kafka.sh -m https://mirrors.aliyun.com/apache/kafka/3.9.0
 先把官方安装包 `kafka_2.13-3.9.0.tgz` 拷到目标机,然后:
 
 ```bash
-sudo ./deploy_kafka.sh -f ./kafka_2.13-3.9.0.tgz \
+sudo ./deploy_kafka_single.sh -f ./kafka_2.13-3.9.0.tgz \
      -i /usr/local/kafka -d /usr/local/kafka/data -H 172.21.31.29
 ```
 
@@ -104,10 +104,10 @@ journalctl -u kafka -f       # 实时日志
 
 ```bash
 # 指定用户名和密码
-sudo ./deploy_kafka.sh --sasl -U admin -P 'MyS3cret!'
+sudo ./deploy_kafka_single.sh --sasl -U admin -P 'MyS3cret!'
 
 # 不指定密码,由脚本随机生成并在完成提示中打印
-sudo ./deploy_kafka.sh --sasl -U admin
+sudo ./deploy_kafka_single.sh --sasl -U admin
 ```
 
 开启后脚本会:
@@ -194,7 +194,7 @@ sudo rm -rf <INSTALL_DIR> <DATA_DIR>
 
 ## 与单机版的关键差异
 
-| 方面 | 单机 `deploy_kafka.sh` | 集群 `deploy_kafka_cluster.sh` |
+| 方面 | 单机 `deploy_kafka_single.sh` | 集群 `deploy_kafka_cluster.sh` |
 |------|------------------------|-------------------------------|
 | CONTROLLER 监听器 | 绑 `localhost`,协议 `PLAINTEXT` | 绑所有网卡(供节点互连),启用 SASL 时协议为 **`SASL_PLAINTEXT`** |
 | 授权超级用户 | `User:admin;User:ANONYMOUS`(ANONYMOUS 仅本机可达) | 仅 `User:admin` —— **controller 也认证**,principal 为 admin,故**无需 ANONYMOUS**,不在集群网络上暴露匿名超权 |
